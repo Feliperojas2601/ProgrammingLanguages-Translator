@@ -1,13 +1,13 @@
 grammar Grammar;
-// Comentario
+
 // REGLAS GRAMATICALES
 programa: (subproceso)* proceso;
 
 subproceso: inicio_sub_proceso TOKEN_ID firma (comando)* fin_sub_proceso;
-inicio_sub_proceso: FUNCION | SUBPROCESO;
-fin_sub_proceso: FINFUNCION | FINSUBPROCESO;
+inicio_sub_proceso: FUNCION | SUBPROCESO | SUBALGORITMO;
+fin_sub_proceso: FINFUNCION | FINSUBPROCESO | FINSUBALGORITMO;
 
-firma: TOKEN_ASIG TOKEN_ID argumentos | argumentos | ;
+firma: TOKEN_ASIG TOKEN_ID (argumentos)? | argumentos | ;
 argumentos: TOKEN_PAR_IZQ (TOKEN_ID (TOKEN_COMA TOKEN_ID)*)? TOKEN_PAR_DER;
 
 proceso: inicio_proceso TOKEN_ID (comando)* fin_proceso;
@@ -59,7 +59,7 @@ ciclo_repetir: REPETIR bloque_repetir;
 bloque_repetir: (comando)* HASTA QUE expresion;
 
 segun: SEGUN expresion_mat HACER bloque_segun;
-bloque_segun: (CASO expresion TOKEN_DOSP (comando)*)+ finsegun;
+bloque_segun: (CASO expresion TOKEN_DOSP (comando)*)* finsegun;
 finsegun: FINSEGUN | DE OTRO MODO TOKEN_DOSP (comando)* FINSEGUN;
 
 comando_especial: BORRAR PANTALLA TOKEN_PYC

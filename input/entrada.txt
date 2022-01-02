@@ -1,8 +1,5 @@
-SubProceso f <- triple ( x )
-    suma[3];
-    dimension fola[2]
-FinSubProceso
+proceso mi_proceso
+    Definir a como entero;
+    Escribir a1/10;
+//Comentario al final
 
-proceso hola
-
-finproceso
