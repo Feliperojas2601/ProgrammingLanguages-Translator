@@ -157,16 +157,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitLlamada_subproceso(GrammarParser.Llamada_subprocesoContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GrammarParser#llamada_subproceso1}.
-	 * @param ctx the parse tree
-	 */
-	void enterLlamada_subproceso1(GrammarParser.Llamada_subproceso1Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link GrammarParser#llamada_subproceso1}.
-	 * @param ctx the parse tree
-	 */
-	void exitLlamada_subproceso1(GrammarParser.Llamada_subproceso1Context ctx);
-	/**
 	 * Enter a parse tree produced by {@link GrammarParser#llamada_dimension}.
 	 * @param ctx the parse tree
 	 */
@@ -176,16 +166,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLlamada_dimension(GrammarParser.Llamada_dimensionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link GrammarParser#llamada_dimension1}.
-	 * @param ctx the parse tree
-	 */
-	void enterLlamada_dimension1(GrammarParser.Llamada_dimension1Context ctx);
-	/**
-	 * Exit a parse tree produced by {@link GrammarParser#llamada_dimension1}.
-	 * @param ctx the parse tree
-	 */
-	void exitLlamada_dimension1(GrammarParser.Llamada_dimension1Context ctx);
 	/**
 	 * Enter a parse tree produced by {@link GrammarParser#dimension}.
 	 * @param ctx the parse tree
@@ -417,53 +397,23 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitExpresion(GrammarParser.ExpresionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GrammarParser#expresion1}.
+	 * Enter a parse tree produced by {@link GrammarParser#expresion_mat}.
 	 * @param ctx the parse tree
 	 */
-	void enterExpresion1(GrammarParser.Expresion1Context ctx);
+	void enterExpresion_mat(GrammarParser.Expresion_matContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link GrammarParser#expresion1}.
+	 * Exit a parse tree produced by {@link GrammarParser#expresion_mat}.
 	 * @param ctx the parse tree
 	 */
-	void exitExpresion1(GrammarParser.Expresion1Context ctx);
+	void exitExpresion_mat(GrammarParser.Expresion_matContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GrammarParser#t}.
+	 * Enter a parse tree produced by {@link GrammarParser#expresion_llamada}.
 	 * @param ctx the parse tree
 	 */
-	void enterT(GrammarParser.TContext ctx);
+	void enterExpresion_llamada(GrammarParser.Expresion_llamadaContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link GrammarParser#t}.
+	 * Exit a parse tree produced by {@link GrammarParser#expresion_llamada}.
 	 * @param ctx the parse tree
 	 */
-	void exitT(GrammarParser.TContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link GrammarParser#lista_e}.
-	 * @param ctx the parse tree
-	 */
-	void enterLista_e(GrammarParser.Lista_eContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link GrammarParser#lista_e}.
-	 * @param ctx the parse tree
-	 */
-	void exitLista_e(GrammarParser.Lista_eContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link GrammarParser#e}.
-	 * @param ctx the parse tree
-	 */
-	void enterE(GrammarParser.EContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link GrammarParser#e}.
-	 * @param ctx the parse tree
-	 */
-	void exitE(GrammarParser.EContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link GrammarParser#operacion}.
-	 * @param ctx the parse tree
-	 */
-	void enterOperacion(GrammarParser.OperacionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link GrammarParser#operacion}.
-	 * @param ctx the parse tree
-	 */
-	void exitOperacion(GrammarParser.OperacionContext ctx);
+	void exitExpresion_llamada(GrammarParser.Expresion_llamadaContext ctx);
 }

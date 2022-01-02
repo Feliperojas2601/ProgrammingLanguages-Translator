@@ -1,7 +1,8 @@
-//Declaracion de subprocesos o funciones
+SubProceso f <- triple ( x )
+    suma[3];
+    dimension fola[2]
+FinSubProceso
 
-proceso mi_proceso
-
-    //Comandos del proceso principal
+proceso hola
 
 finproceso
