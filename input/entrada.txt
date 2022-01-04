@@ -1,5 +1,3 @@
 proceso mi_proceso
-    Definir a como entero;
-    Escribir a1/10;
-//Comentario al final
-
+    a <- FAlso^2^3;
+finproceso

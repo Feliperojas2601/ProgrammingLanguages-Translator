@@ -40,7 +40,7 @@ asignacion1: TOKEN_ASIG expresion TOKEN_PYC
             | llamada_subproceso TOKEN_PYC;
 
 llamada_subproceso: TOKEN_PAR_IZQ (expresion (TOKEN_COMA expresion)*)? TOKEN_PAR_DER | ;
-llamada_dimension: TOKEN_COR_IZQ expresion_mat (TOKEN_COMA expresion_mat)* TOKEN_COR_DER;
+llamada_dimension: TOKEN_COR_IZQ expresion (TOKEN_COMA expresion)* TOKEN_COR_DER;
 
 dimension: DIMENSION TOKEN_ID llamada_dimension (TOKEN_COMA TOKEN_ID llamada_dimension)* TOKEN_PYC;
 
@@ -48,8 +48,8 @@ condicional_si: SI expresion ENTONCES bloque_si;
 bloque_si: (comando)* bloque_sino;
 bloque_sino: SINO (comando)* FINSI | FINSI;
 
-ciclo_para: PARA TOKEN_ID TOKEN_ASIG expresion_mat HASTA expresion_mat ciclo_para1;
-ciclo_para1: CON PASO expresion_mat HACER bloque_para | HACER bloque_para;
+ciclo_para: PARA TOKEN_ID TOKEN_ASIG expresion HASTA expresion ciclo_para1;
+ciclo_para1: CON PASO expresion HACER bloque_para | HACER bloque_para;
 bloque_para: (comando)* FINPARA;
 
 ciclo_mientras: MIENTRAS expresion HACER bloque_mientras;
@@ -58,7 +58,7 @@ bloque_mientras: (comando)* FINMIENTRAS;
 ciclo_repetir: REPETIR bloque_repetir;
 bloque_repetir: (comando)* HASTA QUE expresion;
 
-segun: SEGUN expresion_mat HACER bloque_segun;
+segun: SEGUN expresion HACER bloque_segun;
 bloque_segun: (CASO expresion TOKEN_DOSP (comando)*)* finsegun;
 finsegun: FINSEGUN | DE OTRO MODO TOKEN_DOSP (comando)* FINSEGUN;
 
@@ -78,43 +78,55 @@ leer: LEER lista_leer_id TOKEN_PYC;
 lista_leer_id: TOKEN_ID lista_leer_id1 (TOKEN_COMA TOKEN_ID lista_leer_id1)*;
 lista_leer_id1: llamada_dimension | ;
 
-expresion: expresion TOKEN_O expresion
-          | expresion TOKEN_Y expresion
-          | expresion TOKEN_MAS expresion
-          | expresion TOKEN_IGUAL expresion
-          | expresion TOKEN_DIF expresion
-          | expresion TOKEN_MUL expresion
-          | expresion TOKEN_DIV expresion
-          | expresion TOKEN_POT expresion
-          | expresion TOKEN_MOD expresion
-          | expresion TOKEN_MENOS expresion
-          | expresion TOKEN_MENOR expresion
-          | expresion TOKEN_MAYOR expresion
-          | expresion TOKEN_MENOR_IGUAL expresion
-          | expresion TOKEN_MAYOR_IGUAL expresion
-          | TOKEN_PAR_IZQ expresion TOKEN_PAR_DER
-          | TOKEN_MENOS expresion
-          | TOKEN_NEG expresion
-          | VERDADERO
-          | FALSO
-          | TOKEN_REAL
-          | TOKEN_ENTERO
-          | TOKEN_CADENA
-          | TOKEN_ID expresion_llamada;
+// EXPRESION
+expresion: logOrExpr;
 
-expresion_mat: expresion_mat TOKEN_MAS expresion_mat
-              | expresion_mat TOKEN_MENOS expresion_mat
-              | expresion_mat TOKEN_MUL expresion_mat
-              | expresion_mat TOKEN_DIV expresion_mat
-              | expresion_mat TOKEN_POT expresion_mat
-              | expresion_mat TOKEN_MOD expresion_mat
-              | TOKEN_PAR_IZQ expresion_mat TOKEN_PAR_DER
-              | TOKEN_MENOS expresion_mat
-              | TOKEN_REAL
-              | TOKEN_ENTERO
-              | TOKEN_ID expresion_llamada;
+logOrExpr: logAndExpr logOrExpr1;
+logOrExpr1: (TOKEN_O | O) logAndExpr logOrExpr1
+          | ;
+
+logAndExpr: equExpr logAndExpr1;
+logAndExpr1: (TOKEN_Y | Y) equExpr logAndExpr1
+           | ;
+
+equExpr: relExpr equExpr1;
+equExpr1: operEqu relExpr equExpr1
+        | ;
+
+relExpr: addExpr relExpr1;
+relExpr1: operRel addExpr relExpr1
+        | ;
+
+addExpr: mulExpr addExpr1;
+addExpr1: operAdd mulExpr addExpr1
+        | ;
+
+mulExpr: expExpr mulExpr1;
+mulExpr1: operMul expExpr mulExpr1
+        | ;
+
+expExpr: pr expExpr1;
+expExpr1: operExp pr expExpr1
+        | ;
+
+operEqu: TOKEN_IGUAL | TOKEN_DIF;
+operRel: TOKEN_MENOR | TOKEN_MAYOR | TOKEN_MENOR_IGUAL | TOKEN_MAYOR_IGUAL;
+operAdd: TOKEN_MAS | TOKEN_MENOS;
+operMul: TOKEN_MUL | TOKEN_DIV | TOKEN_MOD | MOD;
+operExp: TOKEN_POT;
+
+pr: FALSO
+  | VERDADERO
+  | TOKEN_ENTERO
+  | TOKEN_REAL
+  | TOKEN_CADENA
+  | TOKEN_ID expresion_llamada
+  | TOKEN_MENOS pr
+  | (TOKEN_NEG | NO) pr
+  | TOKEN_PAR_IZQ expresion TOKEN_PAR_DER;
 
 expresion_llamada: llamada_subproceso | llamada_dimension;
+
 
 // PALABRAS RESERVADAS
 FINSI: [fF][iI][nN][sS][iI];
@@ -180,7 +192,7 @@ TOKEN_REAL: TOKEN_ENTERO ('.'(TOKEN_ENTERO)*);
 TOKEN_ENTERO:'0'..'9'+;
 TOKEN_CADENA: ['"](.*?)['"] ;
 TOKEN_ID: ('a'..'z' | 'A'..'Z') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
-TOKEN_NEG: '~' | NO;
+TOKEN_NEG: '~';
 TOKEN_IGUAL: '=';
 TOKEN_MENOR: '<';
 TOKEN_ASIG: '<-';
@@ -193,12 +205,12 @@ TOKEN_PAR_IZQ: '(';
 TOKEN_PAR_DER: ')';
 TOKEN_MAS: '+';
 TOKEN_MENOS: '-';
-TOKEN_Y: '&' | Y;
-TOKEN_O: '|' | O;
+TOKEN_Y: '&';
+TOKEN_O: '|';
 TOKEN_COR_DER: ']';
 TOKEN_COR_IZQ: '[';
 TOKEN_MUL: '*';
-TOKEN_MOD: '%' | MOD;
+TOKEN_MOD: '%';
 TOKEN_POT: '^';
 TOKEN_PYC: ';';
 TOKEN_COMA: ',';
