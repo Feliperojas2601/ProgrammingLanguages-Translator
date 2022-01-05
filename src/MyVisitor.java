@@ -15,6 +15,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         return null;
     }
 
+
     // COMANDO
     @Override
     public T visitComando(GrammarParser.ComandoContext ctx){
@@ -185,13 +186,11 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitLlamada_dimension(GrammarParser.Llamada_dimensionContext ctx){
         String Llamada_dimensionTrad = "";
         Llamada_dimensionTrad = Llamada_dimensionTrad + "[";
-        if(ctx.expresion() != null){
-            int numExpr = ctx.expresion().size();
-            for(int i = 0; i < numExpr; i++){
-                Llamada_dimensionTrad = Llamada_dimensionTrad + (String) visitExpresion(ctx.expresion().get(i));
-                if(i != numExpr - 1){
-                    Llamada_dimensionTrad = Llamada_dimensionTrad + ",";
-                }
+        int numExpr = ctx.expresion().size();
+        for(int i = 0; i < numExpr; i++){
+            Llamada_dimensionTrad = Llamada_dimensionTrad + (String) visitExpresion(ctx.expresion().get(i));
+            if(i != numExpr - 1){
+                Llamada_dimensionTrad = Llamada_dimensionTrad + "][";
             }
         }
         Llamada_dimensionTrad = Llamada_dimensionTrad + "]";

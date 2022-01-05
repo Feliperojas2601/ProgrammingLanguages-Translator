@@ -1,4 +1,4 @@
-    Para a<-(-10*2) Hasta 10/2 Con Paso p+1 Hacer
+    Para a<-(-10*suma[s]) Hasta 10/2 Con Paso p+1 Hacer
         si num1 > num2 entonces//error sintactico, falta 'entonces'
             res <- num1;
         sino
