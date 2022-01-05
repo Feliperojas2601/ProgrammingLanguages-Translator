@@ -2,7 +2,7 @@ import java.util.HashMap;
 
 public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
-    HashMap<String, Object> table = new HashMap<>();
+    HashMap<String, String> table = new HashMap<>();
 
     String ExpExpr1Th = "";
     String Ciclo_para1Th = "";
@@ -10,7 +10,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
     @Override
     public T visitPrograma(GrammarParser.ProgramaContext ctx){
-        String esto = (String) visitComando(ctx.comando());
+        String esto = (String) visitAsignacion(ctx.asignacion());
         System.out.print(esto);
         return null;
     }
@@ -19,7 +19,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     @Override
     public T visitComando(GrammarParser.ComandoContext ctx){
         String ComandoTrad = ComandoShift;
-
         if(ctx.declaracion() != null){
             ComandoTrad = ComandoTrad + (String) visitDeclaracion(ctx.declaracion());
         }else if(ctx.asignacion() != null){
@@ -185,13 +184,11 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitLlamada_dimension(GrammarParser.Llamada_dimensionContext ctx){
         String Llamada_dimensionTrad = "";
         Llamada_dimensionTrad = Llamada_dimensionTrad + "[";
-        if(ctx.expresion() != null){
-            int numExpr = ctx.expresion().size();
-            for(int i = 0; i < numExpr; i++){
-                Llamada_dimensionTrad = Llamada_dimensionTrad + (String) visitExpresion(ctx.expresion().get(i));
-                if(i != numExpr - 1){
-                    Llamada_dimensionTrad = Llamada_dimensionTrad + ",";
-                }
+        int numExpr = ctx.expresion().size();
+        for(int i = 0; i < numExpr; i++){
+            Llamada_dimensionTrad = Llamada_dimensionTrad + (String) visitExpresion(ctx.expresion().get(i));
+            if(i != numExpr - 1){
+                Llamada_dimensionTrad = Llamada_dimensionTrad + "][";
             }
         }
         Llamada_dimensionTrad = Llamada_dimensionTrad + "]";
@@ -451,6 +448,144 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             Expresion_llamadaTrad = (String) visitLlamada_dimension(ctx.llamada_dimension());
         }
         return (T) Expresion_llamadaTrad;
+    }
+
+
+    //GABRIELA
+    @Override
+    public T visitAsignacion(GrammarParser.AsignacionContext ctx){
+        //Tipos de datos si no exiten cuales son? guardamos los id
+        String AsignacionTrad = "";
+        AsignacionTrad = ctx.TOKEN_ID().getText();
+        AsignacionTrad += (String) visitAsignacion1(ctx.asignacion1());
+        return (T) AsignacionTrad;
+    }
+
+    public T visitAsignacion1(GrammarParser.Asignacion1Context ctx){
+        String Asignacion1Trad = "";
+        if(ctx.TOKEN_ASIG() != null) {
+            Asignacion1Trad = " = ";
+            Asignacion1Trad += (String) visitExpresion(ctx.expresion()) + ";";
+        } else if (ctx.llamada_dimension() != null) {
+            Asignacion1Trad = (String) visitLlamada_dimension(ctx.llamada_dimension());
+            Asignacion1Trad += " = ";
+            Asignacion1Trad += (String) visitExpresion(ctx.expresion()) + ";";
+        } else {
+            Asignacion1Trad = (String) visitLlamada_subproceso(ctx.llamada_subproceso()) + ";";
+        }
+        return (T) Asignacion1Trad;
+    }
+
+    public T visitDimension(GrammarParser.DimensionContext ctx){
+        String DimensionTrad = "";
+        int numExpr = ctx.llamada_dimension().size();
+        for(int i = 0; i < numExpr; i++){
+            DimensionTrad += ctx.TOKEN_ID(i);
+            DimensionTrad += (String) visitLlamada_dimension(ctx.llamada_dimension(i)) + ";\n";
+        }
+        return (T) DimensionTrad;
+    }
+
+    @Override
+    public T visitComando_especial(GrammarParser.Comando_especialContext ctx) {
+
+        String Asignacion1Trad = "";
+        if(ctx.BORRAR() != null || ctx.LIMPIAR() != null) {
+            Asignacion1Trad = "system(\"@cls||clear\");\n";
+        } else if (ctx.esperar() != null) {
+            Asignacion1Trad = (String) visitEsperar(ctx.esperar());
+        }else if (ctx.leer() != null) {
+            //Asignacion1Trad = (String) visitEsperar(ctx.esperar());
+        } else {
+            Asignacion1Trad = (String) visitEscribir(ctx.escribir());
+        }
+        return (T) Asignacion1Trad;
+    }
+
+    @Override
+    public T visitEsperar(GrammarParser.EsperarContext ctx) {
+        return (T) visitEsperar1(ctx.esperar1());
+    }
+
+    @Override
+    public T visitEsperar1(GrammarParser.Esperar1Context ctx) {
+        String Esperar1Trad = "";
+        if(ctx.TECLA() != null) {
+            Esperar1Trad = "getchar();\n";
+        } else if (ctx.expresion() != null) {
+            Esperar1Trad = "sleep(("+ctx.expresion()+")";
+            Esperar1Trad += (String) visitMedida(ctx.medida());
+            Esperar1Trad += ");\n";
+        }
+        return (T) Esperar1Trad;
+    }
+
+    @Override
+    public T visitMedida(GrammarParser.MedidaContext ctx) {
+        String MedidaTrad = "";
+        if (ctx.MILISEGUNDOS() != null){
+            MedidaTrad = "/1000";
+        }
+        return (T) MedidaTrad;
+    }
+
+    @Override
+    public T visitEscribir(GrammarParser.EscribirContext ctx){
+        String EscribirTrad = "";
+        for (GrammarParser.ExpresionContext expresion : ctx.expresion()){
+            EscribirTrad = "printf("+ (String) visitExpresion(expresion) +");\n";
+        }
+        return (T) EscribirTrad;
+    }
+
+    @Override
+    public T visitDeclaracion(GrammarParser.DeclaracionContext ctx) {
+        String DeclaracionTrad = "";
+        T tipo = visitTipo(ctx.tipo());
+        for (int i = 0; i<ctx.TOKEN_ID().size(); i++) {
+            System.out.print(" "+ctx.TOKEN_ID(i).toString());
+            if (tipo != null) {
+                if (tipo.equals((T) ctx.tipo().CADENA()) | tipo.equals((T) ctx.tipo().TEXTO())) {
+                    System.out.print("[1000]");
+                }
+            }
+            if (i != ctx.TOKEN_ID().size() -1) {
+                System.out.print(",");
+            }
+        }
+        System.out.print(";\n");
+        return null;
+    }
+
+    @Override
+    public T visitTipo(GrammarParser.TipoContext ctx) {
+        if (ctx.NUMERICO() != null) {
+            System.out.print("float");
+        }
+        if (ctx.NUMERO() != null) {
+            System.out.print("float");
+        }
+        if (ctx.CARACTER() != null) {
+            System.out.print("char");
+        }
+        if (ctx.ENTERO() != null) {
+            System.out.print("int");
+        }
+        if (ctx.REAL() != null) {
+            System.out.print("float");
+        }
+        if (ctx.LOGICO() != null){
+            System.out.print("bool");
+        }
+        if (ctx.CADENA() != null){
+            System.out.print("char");
+            return (T) ctx.CADENA();
+        }
+        if (ctx.TEXTO() != null){
+            System.out.print("char");
+            return (T) ctx.TEXTO();
+        }
+        return null;
     }
 
 }

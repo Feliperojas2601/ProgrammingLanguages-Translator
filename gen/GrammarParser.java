@@ -1,4 +1,4 @@
-// Generated from C:/Users/julia/Documents/LL3/grammar\Grammar.g4 by ANTLR 4.9.2
+// Generated from C:/Users/Hp Probook 440/Desktop/Gabriela/Lenguajes/ProgrammingLanguages-Translator/grammar\Grammar.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -149,8 +149,8 @@ public class GrammarParser extends Parser {
 	}
 
 	public static class ProgramaContext extends ParserRuleContext {
-		public ComandoContext comando() {
-			return getRuleContext(ComandoContext.class,0);
+		public AsignacionContext asignacion() {
+			return getRuleContext(AsignacionContext.class,0);
 		}
 		public ProgramaContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -170,7 +170,7 @@ public class GrammarParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(120);
-			comando();
+			asignacion();
 			}
 		}
 		catch (RecognitionException re) {
@@ -1090,7 +1090,6 @@ public class GrammarParser extends Parser {
 				match(TOKEN_PAR_DER);
 				}
 				break;
-			case EOF:
 			case FINSI:
 			case Y:
 			case O:
@@ -2677,7 +2676,6 @@ public class GrammarParser extends Parser {
 				logOrExpr1();
 				}
 				break;
-			case EOF:
 			case FINSI:
 			case PARA:
 			case HASTA:
@@ -2822,7 +2820,6 @@ public class GrammarParser extends Parser {
 				logAndExpr1();
 				}
 				break;
-			case EOF:
 			case FINSI:
 			case O:
 			case PARA:
@@ -2961,7 +2958,6 @@ public class GrammarParser extends Parser {
 				equExpr1();
 				}
 				break;
-			case EOF:
 			case FINSI:
 			case Y:
 			case O:
@@ -3104,7 +3100,6 @@ public class GrammarParser extends Parser {
 				relExpr1();
 				}
 				break;
-			case EOF:
 			case FINSI:
 			case Y:
 			case O:
@@ -3247,7 +3242,6 @@ public class GrammarParser extends Parser {
 				addExpr1();
 				}
 				break;
-			case EOF:
 			case FINSI:
 			case Y:
 			case O:
@@ -3396,7 +3390,6 @@ public class GrammarParser extends Parser {
 				mulExpr1();
 				}
 				break;
-			case EOF:
 			case FINSI:
 			case Y:
 			case O:
@@ -3544,7 +3537,6 @@ public class GrammarParser extends Parser {
 				expExpr1();
 				}
 				break;
-			case EOF:
 			case FINSI:
 			case Y:
 			case O:
@@ -3992,7 +3984,6 @@ public class GrammarParser extends Parser {
 			setState(520);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case EOF:
 			case FINSI:
 			case Y:
 			case O:
@@ -4130,7 +4121,7 @@ public class GrammarParser extends Parser {
 		"\3\2\2\2\\\u01c5\3\2\2\2^\u01cd\3\2\2\2`\u01cf\3\2\2\2b\u01d7\3\2\2\2"+
 		"d\u01d9\3\2\2\2f\u01e1\3\2\2\2h\u01e3\3\2\2\2j\u01eb\3\2\2\2l\u01ed\3"+
 		"\2\2\2n\u01ef\3\2\2\2p\u01f1\3\2\2\2r\u01f3\3\2\2\2t\u01f5\3\2\2\2v\u0206"+
-		"\3\2\2\2x\u020a\3\2\2\2z{\5\24\13\2{\3\3\2\2\2|}\5\6\4\2}~\7>\2\2~\u0082"+
+		"\3\2\2\2x\u020a\3\2\2\2z{\5\32\16\2{\3\3\2\2\2|}\5\6\4\2}~\7>\2\2~\u0082"+
 		"\5\n\6\2\177\u0081\5\24\13\2\u0080\177\3\2\2\2\u0081\u0084\3\2\2\2\u0082"+
 		"\u0080\3\2\2\2\u0082\u0083\3\2\2\2\u0083\u0085\3\2\2\2\u0084\u0082\3\2"+
 		"\2\2\u0085\u0086\5\b\5\2\u0086\5\3\2\2\2\u0087\u0088\t\2\2\2\u0088\7\3"+
