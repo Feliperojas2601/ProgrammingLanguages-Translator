@@ -1,7 +1,8 @@
 grammar Grammar;
 
 // REGLAS GRAMATICALES
-programa: (subproceso)* proceso;
+programa: comando;
+//(subproceso)* proceso;
 
 subproceso: inicio_sub_proceso TOKEN_ID firma (comando)* fin_sub_proceso;
 inicio_sub_proceso: FUNCION | SUBPROCESO | SUBALGORITMO;
