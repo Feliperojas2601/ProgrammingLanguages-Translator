@@ -1,8 +1,7 @@
 grammar Grammar;
 
 // REGLAS GRAMATICALES
-programa: comando;
-//(subproceso)* proceso;
+programa: (subproceso)* proceso;
 
 subproceso: inicio_sub_proceso TOKEN_ID firma (comando)* fin_sub_proceso;
 inicio_sub_proceso: FUNCION | SUBPROCESO | SUBALGORITMO;
@@ -40,8 +39,8 @@ asignacion1: TOKEN_ASIG expresion TOKEN_PYC
             | llamada_dimension TOKEN_ASIG expresion TOKEN_PYC
             | llamada_subproceso TOKEN_PYC;
 
-llamada_subproceso: TOKEN_PAR_IZQ (expresion (TOKEN_COMA expresion)*)? TOKEN_PAR_DER | ;
-llamada_dimension: TOKEN_COR_IZQ expresion (TOKEN_COMA expresion)* TOKEN_COR_DER;
+llamada_subproceso: TOKEN_PAR_IZQ (logOrExpr (TOKEN_COMA logOrExpr)*)? TOKEN_PAR_DER | ;
+llamada_dimension: TOKEN_COR_IZQ logOrExpr (TOKEN_COMA logOrExpr)* TOKEN_COR_DER;
 
 dimension: DIMENSION TOKEN_ID llamada_dimension (TOKEN_COMA TOKEN_ID llamada_dimension)* TOKEN_PYC;
 
@@ -124,7 +123,7 @@ pr: FALSO
   | TOKEN_ID expresion_llamada
   | TOKEN_MENOS pr
   | (TOKEN_NEG | NO) pr
-  | TOKEN_PAR_IZQ expresion TOKEN_PAR_DER;
+  | TOKEN_PAR_IZQ logOrExpr TOKEN_PAR_DER;
 
 expresion_llamada: llamada_subproceso | llamada_dimension;
 

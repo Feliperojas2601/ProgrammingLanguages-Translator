@@ -1,13 +1,32 @@
-    Para a<-(-10*suma[s]) Hasta 10/2 Con Paso p+1 Hacer
-        si num1 > num2 entonces//error sintactico, falta 'entonces'
-            res <- num1;
-        sino
-            Para a<-(-10*2) Hasta 10/2 Con Paso p+1 Hacer
-                si num1 > num2 entonces//error sintactico, falta 'entonces'
-                    res <- num1;
-                sino
-                    res <- num2;
-                finsi
-            FinPara
-        finsi
-    FinPara
+subproceso varReturn <- hola(e, r, d)
+    definir varReturn como entero;
+finsubproceso
+
+subproceso prueba()
+
+finsubproceso
+
+subproceso adios(a, b)
+    prueba();
+    hola(12, verdadero, 2/7);
+    definir r como real;
+finsubproceso
+
+subproceso set(e, r)
+    adios(hola(12, "cd", 2 < 23), 12 = "cad");
+    prueba();
+    definir a,b,var como real;
+    definir k, f como logico;
+    dimension a[2,3];
+    a[1,2] <- hola(falso, "cd", 2 < 23) + prueba;
+    leer a[2], f, var;
+    adios(k, a[2]);
+finsubproceso
+
+subproceso dd
+    set(12, verdadero);
+finsubproceso
+
+proceso main
+    dd;
+finproceso
