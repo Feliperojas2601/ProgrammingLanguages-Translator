@@ -2,8 +2,8 @@ subproceso varReturn <- hola(e, r, d)
     definir varReturn como entero;
 finsubproceso
 
-subproceso prueba()
-
+subproceso ser <- prueba()
+    definir ser como real;
 finsubproceso
 
 subproceso adios(a, b)
@@ -13,12 +13,12 @@ subproceso adios(a, b)
 finsubproceso
 
 subproceso set(e, r)
-    adios(hola(12, "cd", 2 < 23), 12 = "cad");
+    adios(12.3 + hola(2 = prueba, "cd", 2 < 23), 12 = "cad");
     prueba();
     definir a,b,var como real;
     definir k, f como logico;
     dimension a[2,3];
-    a[1,2] <- hola(falso, "cd", 2 < 23) + prueba;
+    a[1,2] <- 2 + hola(2 - prueba + a[1 + 2, 2 - 2 + hola(1,2,3)], "cd", 2 < 23) + prueba;
     leer a[2], f, var;
     adios(k, a[2]);
 finsubproceso

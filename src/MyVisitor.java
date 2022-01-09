@@ -19,11 +19,13 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
     public String getTipoExpresion(){
         String tipo = "";
-        if(tokensExpresionActual.contains("OpBool") || tokensExpresionActual.contains("bool") || tokensExpresionActual.contains("bool*")){
+
+        int index = tokensExpresionActual.size() - 1;
+        if(tokensExpresionActual.get(index).contains("OpBool") || tokensExpresionActual.get(index).contains("bool") || tokensExpresionActual.get(index).contains("bool*")){
             tipo += "bool";
-        }else if(tokensExpresionActual.contains("float") || tokensExpresionActual.contains("OpDiv") || tokensExpresionActual.contains("float*")){
+        }else if(tokensExpresionActual.get(index).contains("float") || tokensExpresionActual.get(index).contains("OpDiv") || tokensExpresionActual.get(index).contains("float*")){
             tipo += "float";
-        }else if(tokensExpresionActual.contains("cadena") || tokensExpresionActual.contains("cadena*")){
+        }else if(tokensExpresionActual.get(index).contains("cadena") || tokensExpresionActual.get(index).contains("cadena*")){
             tipo += "cadena";
         }else{
             tipo += "int";
@@ -320,7 +322,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             if(ctx.TOKEN_PAR_IZQ() != null){
                 Llamada_subprocesoTrad += "(";
                 for(int i = 0; i < ctx.logOrExpr().size(); i++){
-                    tokensExpresionActual.clear();
                     Llamada_subprocesoTrad += (String) visitLogOrExpr(ctx.logOrExpr().get(i));
                     if(i != ctx.logOrExpr().size() - 1){
                         Llamada_subprocesoTrad += ",";
@@ -331,12 +332,14 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }else{
             String nomSubProceso = Llamada_subproceso1Th;
             for (int i = 0; i < ctx.logOrExpr().size(); i++) {
-                tokensExpresionActual.clear();
                 visitLogOrExpr(ctx.logOrExpr().get(i));
                 if (funArg.get(nomSubProceso).get(Integer.toString(i)) == null) {
                     funArg.get(nomSubProceso).put(Integer.toString(i), new ArrayList<>());
                 }
                 funArg.get(nomSubProceso).get(Integer.toString(i)).add(getTipoExpresion());
+
+                int index = tokensExpresionActual.size() - 1;
+                tokensExpresionActual.remove(index);
             }
         }
 
@@ -353,6 +356,8 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             if(i != ctx.logOrExpr().size() - 1){
                 Llamada_dimensionTrad += "][";
             }
+            int index = tokensExpresionActual.size() - 1;
+            tokensExpresionActual.remove(index);
         }
         Llamada_dimensionTrad += "]";
 
@@ -754,8 +759,8 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     // EXPRESION
     @Override
     public T visitExpresion(GrammarParser.ExpresionContext ctx){
-        tokensExpresionActual.clear();
         String ExpresionTrad = (String) visitLogOrExpr(ctx.logOrExpr());
+        tokensExpresionActual.clear();
         return (T) ExpresionTrad;
     }
 
@@ -763,6 +768,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitLogOrExpr(GrammarParser.LogOrExprContext ctx){
         String LogOrExprTrad = "";
 
+        tokensExpresionActual.add("");
         LogOrExprTrad += (String) visitLogAndExpr(ctx.logAndExpr());
         LogOrExprTrad += (String) visitLogOrExpr1(ctx.logOrExpr1());
 
@@ -774,7 +780,8 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         String LogOrExpr1Trad = "";
 
         if((ctx.TOKEN_O() != null) || (ctx.O() != null)) {
-            tokensExpresionActual.add("OpBool");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpBool");
             LogOrExpr1Trad += " || ";
             LogOrExpr1Trad += (String) visitLogAndExpr(ctx.logAndExpr());
             LogOrExpr1Trad += (String) visitLogOrExpr1(ctx.logOrExpr1());
@@ -798,7 +805,8 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         String LogAndExpr1Trad = "";
 
         if((ctx.TOKEN_Y() != null) || (ctx.Y() != null)) {
-            tokensExpresionActual.add("OpBool");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpBool");
             LogAndExpr1Trad += " && ";
             LogAndExpr1Trad += (String) visitEquExpr(ctx.equExpr());
             LogAndExpr1Trad += (String) visitLogAndExpr1(ctx.logAndExpr1());
@@ -914,7 +922,8 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         String ExpExpr1Trad = "";
 
         if(ctx.operExp() != null) {
-            tokensExpresionActual.add("OpPot");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpPot");
             ExpExpr1Th = "pow(" + ExpExpr1Th + "," + (String) visitPr(ctx.pr()) + ")";
             ExpExpr1Trad += (String) visitExpExpr1(ctx.expExpr1());
         }else{
@@ -929,13 +938,16 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         String OperMulTrad = "";
 
         if(ctx.TOKEN_MUL() != null){
-            tokensExpresionActual.add("OpMul");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpMul");
             OperMulTrad += "*";
         }else if(ctx.TOKEN_DIV() != null){
-            tokensExpresionActual.add("OpDiv");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpDiv");
             OperMulTrad += "/";
         }else{
-            tokensExpresionActual.add("OpMod");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpMod");
             OperMulTrad += " % ";
         }
 
@@ -946,7 +958,9 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitOperAdd(GrammarParser.OperAddContext ctx){
         String OperAddTrad = "";
 
-        tokensExpresionActual.add("OpMat");
+        int index = tokensExpresionActual.size()-1;
+        tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpMat");
+
         if(ctx.TOKEN_MAS() != null){
             OperAddTrad += " + ";
         }else {
@@ -960,7 +974,9 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitOperRel(GrammarParser.OperRelContext ctx){
         String OperRelTrad = "";
 
-        tokensExpresionActual.add("OpBool");
+        int index = tokensExpresionActual.size()-1;
+        tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpBool");
+
         if(ctx.TOKEN_MENOR() != null){
             OperRelTrad += " < ";
         }else if(ctx.TOKEN_MAYOR() != null){
@@ -978,7 +994,9 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitOperEqu(GrammarParser.OperEquContext ctx){
         String OperEquTrad = "";
 
-        tokensExpresionActual.add("OpBool");
+        int index = tokensExpresionActual.size()-1;
+        tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpBool");
+
         if(ctx.TOKEN_IGUAL() != null){
             OperEquTrad += " == ";
         }else {
@@ -993,19 +1011,24 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         String PrTrad = "";
 
         if(ctx.FALSO() != null){
-            tokensExpresionActual.add("bool");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "bool");
             PrTrad += "false";
         }else if(ctx.VERDADERO() != null){
-            tokensExpresionActual.add("bool");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "bool");
             PrTrad += "true";
         }else if(ctx.TOKEN_ENTERO() != null){
-            tokensExpresionActual.add("int");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "int");
             PrTrad += ctx.TOKEN_ENTERO().getText();
         }else if(ctx.TOKEN_REAL() != null){
-            tokensExpresionActual.add("float");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "float");
             PrTrad += ctx.TOKEN_REAL().getText();
         }else if(ctx.TOKEN_CADENA() != null){
-            tokensExpresionActual.add("cadena");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "cadena");
             PrTrad += ctx.TOKEN_CADENA().getText();
         }else if(ctx.TOKEN_ID() != null){
             Llamada_subproceso1Th = ctx.TOKEN_ID().getText();
@@ -1035,27 +1058,35 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             }
 
             // Almacenar los valores de retorno
-            if(ctx.expresion_llamada().llamada_subproceso() != null) {
+            if(ctx.expresion_llamada().llamada_subproceso() != null){
                 if(funArg.get(ctx.TOKEN_ID().getText()) != null){
-                    tokensExpresionActual.clear();
                     for(String varReturn: funReturn.get(ctx.TOKEN_ID().getText()).keySet()){
-                        tokensExpresionActual.add(funReturn.get(ctx.TOKEN_ID().getText()).get(varReturn));
+                        int index = tokensExpresionActual.size()-1;
+                        String tipoReturn = funReturn.get(ctx.TOKEN_ID().getText()).get(varReturn);
+                        tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoReturn);
                     }
                 }else{
-                    tokensExpresionActual.add(funVar.get(procesoActual).get(ctx.TOKEN_ID().getText()));
+                    int index = tokensExpresionActual.size()-1;
+                    String tipoVar = funVar.get(procesoActual).get(ctx.TOKEN_ID().getText());
+                    tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoVar);
                 }
-            }else {
-                tokensExpresionActual.add(funVar.get(procesoActual).get(ctx.TOKEN_ID().getText()));
+            }else{
+                int index = tokensExpresionActual.size()-1;
+                String tipoDimension = funVar.get(procesoActual).get(ctx.TOKEN_ID().getText());
+                tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoDimension);
             }
 
         }else if(ctx.TOKEN_MENOS() != null){
-            tokensExpresionActual.add("OpMat");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpMat");
             PrTrad += "-" + (String) visitPr(ctx.pr());
         }else if(ctx.TOKEN_NEG() != null){
-            tokensExpresionActual.add("OpBool");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpBool");
             PrTrad += "!" + (String) visitPr(ctx.pr());
         }else if(ctx.NO() != null){
-            tokensExpresionActual.add("OpBool");
+            int index = tokensExpresionActual.size()-1;
+            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpBool");
             PrTrad += "!" + (String) visitPr(ctx.pr());
         }else if(ctx.TOKEN_PAR_IZQ() != null){
             PrTrad += "(" + (String) visitLogOrExpr(ctx.logOrExpr()) + ")";
