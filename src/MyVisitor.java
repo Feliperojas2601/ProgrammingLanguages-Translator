@@ -39,12 +39,12 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }
     }
 
-    public void printtTokensActuales(){
+    public void printTokensActuales(){
         System.out.print("TOKENSACTUALES\n");
         for (int j = 0; j < tokensExpresionActual.size(); j++) {
             System.out.print(tokensExpresionActual.get(j) + "\n");
         }
-        System.out.print("FIn\n");
+        System.out.print("FIN\n");
     }
 
     public String getTipoExpresion(){
@@ -86,6 +86,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             ProgramaTrad += (String) visitSubproceso(ctx.subproceso(i));
         }
         ProgramaTrad += (String) visitProceso(ctx.proceso());
+
         System.out.print(ProgramaTrad);
         return null;
     }
@@ -94,10 +95,11 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitSubproceso(GrammarParser.SubprocesoContext ctx) {
         String SubprocesoTrad = "";
 
-        procesoActual = ctx.TOKEN_ID().getText();
-        visitFirma(ctx.firma());
-
         if(traduccion){
+
+            procesoActual = ctx.TOKEN_ID().getText();
+            visitFirma(ctx.firma());
+
             SubProcesoTh = "";
             for(int i = 0; i < ctx.comando().size(); i++){
                 SubProcesoTh += (String) visitComando(ctx.comando().get(i)) + "\n";
@@ -106,6 +108,9 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             SubprocesoTrad += (String) visitFirma(ctx.firma());
 
         }else{
+            procesoActual = ctx.TOKEN_ID().getText();
+            visitFirma(ctx.firma());
+
             for(int i = 0; i < ctx.comando().size(); i++){
                 visitComando(ctx.comando().get(i));
             }
@@ -144,11 +149,10 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                 FirmaTrad += procesoActual + "_" + Integer.toString(i) + "(";
 
                 if(ctx.argumentos() != null) {
-                    int numVar = ctx.argumentos().TOKEN_ID().size();
-                    for(int j = 0; j < numVar; j++){
+                    for(int j = 0; j < ctx.argumentos().TOKEN_ID().size(); j++){
                         FirmaTrad += funArg.get(procesoActual).get(Integer.toString(j)).get(i) + " ";
-                        FirmaTrad += ctx.argumentos().TOKEN_ID().get(j).getText();
-                        if(j != numVar - 1){
+                        FirmaTrad += ctx.argumentos().TOKEN_ID(j).getText();
+                        if(j != ctx.argumentos().TOKEN_ID().size() - 1){
                             FirmaTrad += ",";
                         }
                     }
@@ -188,7 +192,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             for (int i = 0; i < ctx.comando().size(); i++) {
                 ProcesoTrad += (String) visitComando(ctx.comando(i)) + "\n";
             }
-            ProcesoTrad += "\n\treturn 0\n}\n";
+            ProcesoTrad += "\n\treturn 0;\n}\n";
         }else{
 
             if (funVar.get(procesoActual) == null) {
@@ -257,6 +261,11 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                         listaVar += "[1000]";
                     }
                 }
+
+                funVar.get(procesoActual).put(ctx.TOKEN_ID(i).getText(), tipoTrad);
+                if(funReturn.get(procesoActual).get(ctx.TOKEN_ID(i).getText()) != null){
+                    funReturn.get(procesoActual).put(ctx.TOKEN_ID(i).getText(), tipoTrad);
+                }
             }
 
             if(listaVar.length() != 0){
@@ -269,9 +278,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }else{
             String tipoTrad = (String) visitTipo(ctx.tipo());
             for (int i = 0; i < ctx.TOKEN_ID().size(); i++) {
-                if(funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()) == null) {
-                    funVar.get(procesoActual).put(ctx.TOKEN_ID(i).getText(), tipoTrad);
-                }
+                funVar.get(procesoActual).put(ctx.TOKEN_ID(i).getText(), tipoTrad);
                 if(funReturn.get(procesoActual).get(ctx.TOKEN_ID(i).getText()) != null){
                     funReturn.get(procesoActual).put(ctx.TOKEN_ID(i).getText(), tipoTrad);
                 }
@@ -400,7 +407,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
         Llamada_dimensionTrad += "[";
         for(int i = 0; i < ctx.logOrExpr().size(); i++){
-            Llamada_dimensionTrad += (String) visitLogOrExpr(ctx.logOrExpr().get(i));
+            Llamada_dimensionTrad += "(int)" + (String) visitLogOrExpr(ctx.logOrExpr().get(i));
             if(i != ctx.logOrExpr().size() - 1){
                 Llamada_dimensionTrad += "][";
             }
@@ -420,6 +427,13 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
         if(traduccion){
             for (int i = 0; i < ctx.TOKEN_ID().size(); i++) {
+
+                if(funVar.get(procesoActual).get(ctx.TOKEN_ID().get(i).getText()) != null){
+                    funVar.get(procesoActual).put(ctx.TOKEN_ID().get(i).getText(), funVar.get(procesoActual).get(ctx.TOKEN_ID().get(i).getText()) + "*");
+                }else{
+                    System.out.print("Error semantico - No se ha declarado el tipo de la variable\n");
+                }
+
                 String tipoA = funVar.get(procesoActual).get(ctx.TOKEN_ID().get(i).getText());
                 if(tipoA.equals("cadena*")){
                     tipoA = "char*";
@@ -493,7 +507,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         String Ciclo_paraTrad = "";
 
         Ciclo_para1Th = ctx.TOKEN_ID().getText();
-        Ciclo_paraTrad += "for(int " + Ciclo_para1Th + " = " + (String) visitExpresion(ctx.expresion().get(0)) + "; ";
+        Ciclo_paraTrad += "for(" + Ciclo_para1Th + " = " + (String) visitExpresion(ctx.expresion().get(0)) + "; ";
         Ciclo_paraTrad += Ciclo_para1Th + " < " + (String) visitExpresion(ctx.expresion().get(1)) + "; ";
         Ciclo_paraTrad += (String) visitCiclo_para1(ctx.ciclo_para1());
 
