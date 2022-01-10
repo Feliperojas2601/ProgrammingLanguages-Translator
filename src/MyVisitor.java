@@ -685,7 +685,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitSegun(GrammarParser.SegunContext ctx) {
         String SegunTrad = "";
 
-        SegunTrad += "Switch(";
+        SegunTrad += "switch(";
         SegunTrad += (String) visitExpresion(ctx.expresion());
         SegunTrad += "){\n";
         SegunTrad += (String) visitBloque_segun(ctx.bloque_segun());
@@ -773,7 +773,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             }
 
             String tipo = getTipoExpresion();
-            System.out.println("TIPO: " + tipo);
             if(tipo.equals("bool") || tipo.equals("int")) {
                 listaTipos += "%d";
             }else if(tipo.equals("float")){
