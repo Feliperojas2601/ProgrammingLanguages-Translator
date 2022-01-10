@@ -3,7 +3,7 @@ import org.antlr.v4.runtime.tree.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        try{
+        //try{
 
             GrammarLexer lexer;
             if (args.length>0) {
@@ -19,9 +19,11 @@ public class Main {
 
             MyVisitor<Object> loader = new MyVisitor<Object>();
             loader.visit(tree);
-
+/*
     } catch (Exception e){
             System.err.println("Error (Test): " + e);
         }
+
+ */
     }
 }
