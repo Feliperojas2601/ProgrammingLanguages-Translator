@@ -1,29 +1,43 @@
-Proceso Suma
+Proceso Mayores
 
-    Definir A,B,C como Real;
+    Definir datos,n,may1,may2,i Como Numero;
+    // primero se declara un arreglo de 200 elementos
+    Dimension datos[200];
 
-    // para cargar un dato, se le muestra un mensaje al usuario
-    // con la instrucción Escribir, y luego se lee el dato en
-    // una variable (A para el primero, B para el segundo) con
-    // la instrucción Leer
+    // luego se pide al usuario ingresar la cantidad de datos,
+    // que no debera ser mayor a 200
+    Escribir "Ingrese la cantidad de datos (de 2 a 200):";
+    Leer n;
 
-    Escribir "Ingrese el primer numero:";
-    Leer A;
+    // se leen uno por uno los 200 datos y se los guarda en el arreglo
+    Para i<-0 Hasta n-1 Hacer
+        Escribir "Ingrese el dato ",i+1,":";
+        Leer datos[i];
+    FinPara
 
-    Escribir "Ingrese el segundo numero:";
-    Leer B;
+    // se comparan los dos primeros y se toman como may1 (el mayor de los
+    // dos) y may2 (el segundo mayor).
+    Si datos[0]>datos[1] Entonces
+        may1<-datos[0];
+        may2<-datos[1];
+    Sino
+        may1<-datos[1];
+        may2<-datos[0];
+    FinSi
+    // se recorren los demas elementos buscan si hay alguno mayor que may1 o may2
+    Para i<-2 Hasta n-1 Hacer
+        Si datos[i]>may1 Entonces // si hay un valor mayor que may1
+            may2<-may1; // como may1 era el más grande, pasa a estar en segundo lugar
+            may1<-datos[i]; // y el nuevo dato toma el primer puesto (mayor de todos)
+        Sino // si no era mas grande que may1, todavia puede ser mas grande que may2
+            Si datos[i]>may2 Entonces // si supera al segundo mayor que teniamos
+                may2<-datos[i]; // se lo guarda como segundo mayor
+            FinSi
+        FinSi
+    FinPara
 
-
-    // ahora se calcula la suma y se guarda el resultado en la
-    // variable C mediante la asignación (<-)
-
-    C <- A+B;
-
-
-    // finalmente, se muestra el resultado, precedido de un
-    // mensaje para avisar al usuario, todo en una sola
-    // instrucción Escribir
-
-    Escribir "El resultado es: ",C;
+    // se muestran los resultados
+    Escribir "El mayor es: ",may1;
+    Escribir "El segundo mayor es: ",may2;
 
 FinProceso

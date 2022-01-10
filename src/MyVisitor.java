@@ -188,7 +188,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             for (int i = 0; i < ctx.comando().size(); i++) {
                 ProcesoTrad += (String) visitComando(ctx.comando(i)) + "\n";
             }
-            ProcesoTrad += "\n\treturn 0\n}\n";
+            ProcesoTrad += "\n\treturn 0;\n}\n";
         }else{
 
             if (funVar.get(procesoActual) == null) {
@@ -493,7 +493,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         String Ciclo_paraTrad = "";
 
         Ciclo_para1Th = ctx.TOKEN_ID().getText();
-        Ciclo_paraTrad += "for(int " + Ciclo_para1Th + " = " + (String) visitExpresion(ctx.expresion().get(0)) + "; ";
+        Ciclo_paraTrad += "for( " + Ciclo_para1Th + " = " + (String) visitExpresion(ctx.expresion().get(0)) + "; ";
         Ciclo_paraTrad += Ciclo_para1Th + " < " + (String) visitExpresion(ctx.expresion().get(1)) + "; ";
         Ciclo_paraTrad += (String) visitCiclo_para1(ctx.ciclo_para1());
 
