@@ -93,8 +93,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         visitProceso(ctx.proceso());
 
         traduccion = true;
-        printFunArg();
-        printFunVar();
 
         // SEGUNDO RECORRIDO DEL ARBOL
         for (int i = 0; i < ctx.subproceso().size(); i++){
@@ -324,7 +322,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         if(traduccion){
             String tipoTrad = (String) visitTipo(ctx.tipo());
 
-            String listaVar = "";
             boolean coma = false;
             for(int i = 0; i < ctx.TOKEN_ID().size(); i++){
 
@@ -335,21 +332,14 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                 String tipoActual = funVar.get(procesoActual).get(IdTrad).get(getIndexFunvarActual(IdTrad)+1);
 
                 if(!tipoActual.contains("*")){
-                    if (coma) {
-                        listaVar += ",";
+                    String var = (String) ctx.TOKEN_ID(i).getText();
+
+                    if(tipoTrad.equals("cadena")){
+                        tipoTrad = "char*";
                     }
-                    coma = true;
-                    listaVar += (String) ctx.TOKEN_ID(i).getText();
+                    DeclaracionTrad += tipoTrad + " " + var + "; ";
                 }
             }
-
-            if(listaVar.length() != 0){
-                if(tipoTrad.equals("cadena")){
-                    tipoTrad = "char*";
-                }
-                DeclaracionTrad = tipoTrad + " " + listaVar + ";";
-            }
-
         }else{
             String tipoTrad = (String) visitTipo(ctx.tipo());
             for (int i = 0; i < ctx.TOKEN_ID().size(); i++) {
@@ -528,7 +518,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                 }else {
                     DimensionTrad += tipoActual.substring(0, tipoActual.indexOf('*')) + " " + ctx.TOKEN_ID(i).getText();
                 }
-                DimensionTrad += (String) visitLlamada_dimension(ctx.llamada_dimension(i)) + ";\n";
+                DimensionTrad += (String) visitLlamada_dimension(ctx.llamada_dimension(i)) + ";";
             }
         }else{
             for (int i = 0; i < ctx.TOKEN_ID().size(); i++) {
@@ -1259,7 +1249,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                 if(funVar.get(procesoActual).get(IdTrad) != null){
                     String tipoDimension = funVar.get(procesoActual).get(IdTrad).get(getIndexFunvarActual(IdTrad)+1);
                     if(!ctx.expresion_llamada().llamada_dimension().getText().equals("")){
-                        tipoDimension = tipoDimension.substring(0, tipoDimension.indexOf('*') - 1);
+                        tipoDimension = tipoDimension.substring(0, tipoDimension.indexOf('*'));
                     }
                     tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoDimension);
                 }else {
@@ -1271,7 +1261,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                                     tipoDimension = tipoDimension.substring(0, tipoDimension.indexOf('*'));
                                 }
                             }
-                            System.out.println("TipoDimension: " + tipoDimension);
                             tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoDimension);
                             break;
                         }
