@@ -3,9 +3,9 @@ import java.util.HashMap;
 
 public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
-    HashMap <String, HashMap <String, ArrayList<String>>> funArg = new HashMap<>();
-    HashMap <String, HashMap <String, String>> funReturn = new HashMap<>();
-    HashMap <String, HashMap <String, String>> funVar = new HashMap<>();
+    HashMap<String, HashMap<String, ArrayList<String>>> funArg = new HashMap<>();
+    HashMap<String, HashMap<String, String>> funReturn = new HashMap<>();
+    HashMap<String, HashMap<String, String>> funVar = new HashMap<>();
     ArrayList<String> tokensExpresionActual = new ArrayList<>();
 
     String procesoActual = "";
@@ -16,6 +16,38 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     String Ciclo_para1Th = "";
     String SubProcesoTh = "";
     String Llamada_subproceso1Th = "";
+
+    public void prinFUNARG() {
+        // IMPRESION DE TABLAS
+        System.out.print("FUNARG\n");
+        for (String fun : funArg.keySet()) {
+            System.out.print(fun + ":");
+            for (String var : funArg.get(fun).keySet()) {
+                System.out.print("  " + var + ":" + funArg.get(fun).get(var));
+            }
+            System.out.print("\n");
+        }
+    }
+
+    public void prinFUNVAR() {
+        System.out.print("FUNVAR\n");
+        for (String fun : funVar.keySet()) {
+            System.out.print(fun + ":");
+            for (String var : funVar.get(fun).keySet()) {
+                System.out.print("  " + var + ":" + funVar.get(fun).get(var));
+            }
+            System.out.print("\n");
+        }
+    }
+
+    public void printTOKENSACTUALES() {
+        System.out.print("TOKENSACTUALES\n");
+        for (int j = 0; j < tokensExpresionActual.size(); j++) {
+            System.out.print(tokensExpresionActual.get(j) + "\n");
+        }
+        System.out.print("FIn\n");
+    }
+
 
     public String getTipoExpresion(){
         String tipo = "";
@@ -49,6 +81,9 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         visitProceso(ctx.proceso());
 
         traduccion = true;
+
+        prinFUNARG();
+        prinFUNVAR();
 
         // SEGUNDO RECORRIDO DEL ARBOL
         for (int i = 0; i < ctx.subproceso().size(); i++){
@@ -290,30 +325,36 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             Asignacion1Trad += " = ";
             Asignacion1Trad += (String) visitExpresion(ctx.expresion()) + ";";
         }else if(ctx.llamada_subproceso() != null){
-            if(ctx.llamada_subproceso().TOKEN_PAR_IZQ() != null) {
-                int numClon = 0;
-                if (traduccion) {
-                    if (funArg.get(Llamada_subproceso1Th).get("0") != null) {
-                        for (int i = 0; i < funArg.get(Llamada_subproceso1Th).get("0").size(); i++) {
-                            String tipo = funArg.get(Llamada_subproceso1Th).get("0").get(i);
+
+            String nomSubproceso = Llamada_subproceso1Th;
+            if(traduccion){
+                if (funArg.get(nomSubproceso) != null) {
+                    int numClon = 0;
+                    if (funArg.get(nomSubproceso).get("0") != null) {
+                        for (int i = 0; i < funArg.get(nomSubproceso).get("0").size(); i++) {
+                            String tipo = funArg.get(nomSubproceso).get("0").get(i);
                             if (tipo.charAt(tipo.length() - 1) != 'r') {
-                                funArg.get(Llamada_subproceso1Th).get("0").set(i, tipo + "r");
+                                funArg.get(nomSubproceso).get("0").set(i, tipo + "r");
                                 break;
                             }
                             numClon++;
                         }
                     }
+                    Asignacion1Trad += nomSubproceso + "_" + Integer.toString(numClon);
+                    Llamada_subproceso1Th = nomSubproceso;
+                    String Llamada_subprocesoTrad = (String) visitLlamada_subproceso(ctx.llamada_subproceso());
+                    if (Llamada_subprocesoTrad.equals("")) {
+                        Asignacion1Trad += "()";
+                    }
+                    Asignacion1Trad += Llamada_subprocesoTrad + ";";
+                }else{
+                    Asignacion1Trad += nomSubproceso + ";";
                 }
-
-                Asignacion1Trad += Llamada_subproceso1Th + "_" + Integer.toString(numClon);
-                String Llamada_subprocesoTrad = (String) visitLlamada_subproceso(ctx.llamada_subproceso());
-                if (Llamada_subprocesoTrad.equals("")) {
-                    Asignacion1Trad += "()";
-                }
-                Asignacion1Trad += Llamada_subprocesoTrad + ";";
             }else{
-                Asignacion1Trad += Llamada_subproceso1Th + ";";
+                Llamada_subproceso1Th = nomSubproceso;
+                visitLlamada_subproceso(ctx.llamada_subproceso());
             }
+
         }else{
             Asignacion1Trad += Llamada_subproceso1Th;
             Asignacion1Trad += " = ";
@@ -1044,33 +1085,36 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "cadena");
             PrTrad += ctx.TOKEN_CADENA().getText();
         }else if(ctx.TOKEN_ID() != null){
-            Llamada_subproceso1Th = ctx.TOKEN_ID().getText();
-            String Expresion_llamadaTrad = (String) visitExpresion_llamada(ctx.expresion_llamada());
 
-            if(ctx.expresion_llamada().llamada_subproceso() != null) {
-                if(traduccion && ctx.expresion_llamada().llamada_subproceso().TOKEN_PAR_IZQ() != null) {
-                    int numClon = 0;
-                    Llamada_subproceso1Th = ctx.TOKEN_ID().getText();
-                    if(funArg.get(Llamada_subproceso1Th).get("0") != null) {
-                        for (int i = 0; i < funArg.get(Llamada_subproceso1Th).get("0").size(); i++) {
-                            String tipo = funArg.get(Llamada_subproceso1Th).get("0").get(i);
-                            if (tipo.charAt(tipo.length() - 1) != 'r') {
-                                funArg.get(Llamada_subproceso1Th).get("0").set(i, tipo + "r");
-                                break;
+            if(ctx.expresion_llamada().llamada_subproceso() != null){
+                if(traduccion){
+                    if(funArg.get(ctx.TOKEN_ID().getText()) != null){
+                        int numClon = 0;
+                        if(funArg.get(ctx.TOKEN_ID().getText()).get("0") != null) {
+                            for (int i = 0; i < funArg.get(ctx.TOKEN_ID().getText()).get("0").size(); i++) {
+                                String tipo = funArg.get(ctx.TOKEN_ID().getText()).get("0").get(i);
+                                if (tipo.charAt(tipo.length() - 1) != 'r') {
+                                    funArg.get(ctx.TOKEN_ID().getText()).get("0").set(i, tipo + "r");
+                                    break;
+                                }
+                                numClon++;
                             }
-                            numClon++;
                         }
-                    }
-                    PrTrad += ctx.TOKEN_ID().getText() + "_" + Integer.toString(numClon) + Expresion_llamadaTrad;
-                    if(funArg.get(ctx.TOKEN_ID().getText()) != null && Expresion_llamadaTrad.length() == 0){
-                        PrTrad += "()";
+                        PrTrad += ctx.TOKEN_ID().getText() + "_" + Integer.toString(numClon);
+                        Llamada_subproceso1Th = ctx.TOKEN_ID().getText();
+                        String Llamada_subprocesoTrad = (String) visitExpresion_llamada(ctx.expresion_llamada());
+                        if (Llamada_subprocesoTrad.equals("")) {
+                            PrTrad += "()";
+                        }
+                    }else{
+                        PrTrad += ctx.TOKEN_ID().getText();
                     }
                 }else{
-                    PrTrad += ctx.TOKEN_ID().getText();
+                    Llamada_subproceso1Th = ctx.TOKEN_ID().getText();
+                    visitExpresion_llamada(ctx.expresion_llamada());
                 }
-
             }else{
-                PrTrad += ctx.TOKEN_ID().getText() + Expresion_llamadaTrad;
+                PrTrad += ctx.TOKEN_ID().getText() + (String) visitExpresion_llamada(ctx.expresion_llamada());
             }
 
             // Almacenar los valores de retorno
@@ -1125,33 +1169,3 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     }
 
 }
-
-
-
-
-/*
-        // IMPRESION DE TABLAS
-        System.out.print("FUNARG\n");
-        for(String fun: funArg.keySet()){
-            System.out.print(fun + ":");
-            for(String var: funArg.get(fun).keySet()){
-                System.out.print("  " + var + ":" + funArg.get(fun).get(var));
-            }
-            System.out.print("\n");
-        }
-
-        System.out.print("FUNVAR\n");
-        for(String fun: funVar.keySet()){
-            System.out.print(fun + ":");
-            for(String var: funVar.get(fun).keySet()){
-                System.out.print("  " + var + ":" + funVar.get(fun).get(var));
-            }
-            System.out.print("\n");
-        }
-
-        System.out.print("TOKENSACTUALES\n");
-            for(int j = 0; j < tokensExpresionActual.size(); j++){
-                System.out.print(tokensExpresionActual.get(j) + "\n");
-            }
-        System.out.print("FIn\n");
-         */
