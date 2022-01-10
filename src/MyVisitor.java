@@ -82,9 +82,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
         traduccion = true;
 
-        prinFUNARG();
-        prinFUNVAR();
-
         // SEGUNDO RECORRIDO DEL ARBOL
         for (int i = 0; i < ctx.subproceso().size(); i++){
             ProgramaTrad += (String) visitSubproceso(ctx.subproceso(i));
@@ -1106,6 +1103,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                         if (Llamada_subprocesoTrad.equals("")) {
                             PrTrad += "()";
                         }
+                        PrTrad += Llamada_subprocesoTrad;
                     }else{
                         PrTrad += ctx.TOKEN_ID().getText();
                     }
