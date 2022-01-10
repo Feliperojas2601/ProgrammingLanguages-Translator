@@ -17,8 +17,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     String SubProcesoTh = "";
     String Llamada_subproceso1Th = "";
 
-    public void prinFUNARG() {
-        // IMPRESION DE TABLAS
+    public void printFunArg() {
         System.out.print("FUNARG\n");
         for (String fun : funArg.keySet()) {
             System.out.print(fun + ":");
@@ -29,7 +28,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }
     }
 
-    public void prinFUNVAR() {
+    public void printFunVar() {
         System.out.print("FUNVAR\n");
         for (String fun : funVar.keySet()) {
             System.out.print(fun + ":");
@@ -40,14 +39,13 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }
     }
 
-    public void printTOKENSACTUALES() {
+    public void printtTokensActuales(){
         System.out.print("TOKENSACTUALES\n");
         for (int j = 0; j < tokensExpresionActual.size(); j++) {
             System.out.print(tokensExpresionActual.get(j) + "\n");
         }
         System.out.print("FIn\n");
     }
-
 
     public String getTipoExpresion(){
         String tipo = "";
@@ -62,6 +60,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }else{
             tipo += "int";
         }
+
         return tipo;
     }
 
@@ -187,7 +186,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         if(traduccion) {
             ProcesoTrad += "int main(){\n";
             for (int i = 0; i < ctx.comando().size(); i++) {
-                ProcesoTrad += (String) visitComando(ctx.comando(i));
+                ProcesoTrad += (String) visitComando(ctx.comando(i)) + "\n";
             }
             ProcesoTrad += "\n\treturn 0\n}\n";
         }else{
