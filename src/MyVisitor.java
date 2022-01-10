@@ -5,9 +5,10 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
     HashMap<String, HashMap<String, ArrayList<String>>> funArg = new HashMap<>();
     HashMap<String, HashMap<String, String>> funReturn = new HashMap<>();
-    HashMap<String, HashMap<String, String>> funVar = new HashMap<>();
+    HashMap<String, HashMap<String, ArrayList<String>>> funVar = new HashMap<>();
     ArrayList<String> tokensExpresionActual = new ArrayList<>();
 
+    int numClonTh;
     String procesoActual = "";
     boolean traduccion = false;
     String ComandoShift = "\t";
@@ -39,24 +40,36 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }
     }
 
-    public void printtTokensActuales(){
+    public void printTokensActuales(){
         System.out.print("TOKENSACTUALES\n");
         for (int j = 0; j < tokensExpresionActual.size(); j++) {
             System.out.print(tokensExpresionActual.get(j) + "\n");
         }
-        System.out.print("FIn\n");
+        System.out.print("FIN\n");
     }
 
-    public String getTipoExpresion(){
+    public String getTipoExpresion() {
         String tipo = "";
 
         int index = tokensExpresionActual.size() - 1;
-        if(tokensExpresionActual.get(index).contains("OpBool") || tokensExpresionActual.get(index).contains("bool") || tokensExpresionActual.get(index).contains("bool*")){
+        if(tokensExpresionActual.get(index).contains("cadena*")) {
+            tipo += tokensExpresionActual.get(index);
+        }else if(tokensExpresionActual.get(index).contains("bool*")){
+            tipo += tokensExpresionActual.get(index);
+        }else if(tokensExpresionActual.get(index).contains("float*")){
+            tipo += tokensExpresionActual.get(index);
+        }else if(tokensExpresionActual.get(index).contains("int*")){
+            tipo += tokensExpresionActual.get(index);
+        }else if(tokensExpresionActual.get(index).contains("char*")){
+            tipo += tokensExpresionActual.get(index);
+        }else if(tokensExpresionActual.get(index).contains("OpBool") || tokensExpresionActual.get(index).contains("bool")){
             tipo += "bool";
-        }else if(tokensExpresionActual.get(index).contains("float") || tokensExpresionActual.get(index).contains("OpDiv") || tokensExpresionActual.get(index).contains("float*")){
+        }else if(tokensExpresionActual.get(index).contains("float") || tokensExpresionActual.get(index).contains("OpDiv")){
             tipo += "float";
-        }else if(tokensExpresionActual.get(index).contains("cadena") || tokensExpresionActual.get(index).contains("cadena*")){
+        }else if(tokensExpresionActual.get(index).contains("cadena")){
             tipo += "cadena";
+        }else if(tokensExpresionActual.get(index).contains("char")){
+            tipo += "char";
         }else{
             tipo += "int";
         }
@@ -80,32 +93,129 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         visitProceso(ctx.proceso());
 
         traduccion = true;
+        printFunArg();
+        printFunVar();
 
         // SEGUNDO RECORRIDO DEL ARBOL
         for (int i = 0; i < ctx.subproceso().size(); i++){
             ProgramaTrad += (String) visitSubproceso(ctx.subproceso(i));
         }
         ProgramaTrad += (String) visitProceso(ctx.proceso());
+
         System.out.print(ProgramaTrad);
         return null;
+    }
+
+    public void resetIndexFunVar(){
+        for(String fun : funVar.keySet()){
+            for(String var : funVar.get(fun).keySet()){
+                funVar.get(fun).get(var).set(0, "-1");
+            }
+        }
+    }
+
+    public HashMap<String, HashMap<String, ArrayList<String>>> clonarFunArg(HashMap<String, HashMap<String, ArrayList<String>>>funArg){
+        HashMap<String, HashMap<String, ArrayList<String>>> FunArgCopy = new HashMap<>();
+        for(String fun : funArg.keySet()){
+            HashMap<String, ArrayList<String>> variables = new HashMap<>();
+            for(String var : funArg.get(fun).keySet()){
+                ArrayList<String> array = new ArrayList<>();
+                for(int i = 0; i < funArg.get(fun).get(var).size(); i++){
+                    array.add(funArg.get(fun).get(var).get(i));
+                }
+                variables.put(var, array);
+            }
+            FunArgCopy.put(fun, variables);
+        }
+        return FunArgCopy;
     }
 
     @Override
     public T visitSubproceso(GrammarParser.SubprocesoContext ctx) {
         String SubprocesoTrad = "";
 
-        procesoActual = ctx.TOKEN_ID().getText();
-        visitFirma(ctx.firma());
-
         if(traduccion){
-            SubProcesoTh = "";
-            for(int i = 0; i < ctx.comando().size(); i++){
-                SubProcesoTh += (String) visitComando(ctx.comando().get(i)) + "\n";
-            }
+            String varReturn = "";
             procesoActual = ctx.TOKEN_ID().getText();
-            SubprocesoTrad += (String) visitFirma(ctx.firma());
+            if(ctx.firma().TOKEN_ID() != null) {
+                varReturn = procesoActual;
+                procesoActual = ctx.firma().TOKEN_ID().getText();
+            }
+
+            int numClones = 0;
+            for(String var : funArg.get(procesoActual).keySet()){
+                if (funArg.get(procesoActual).get(var) != null) {
+                    numClones += funArg.get(procesoActual).get(var).size() - 1;
+                }
+                break;
+            }
+            if (ctx.firma().argumentos() != null && ctx.firma().argumentos().TOKEN_ID().size() == 0) {
+                numClones += 1;
+            }else if (ctx.firma().argumentos() == null) {
+                numClones += 1;
+            }
+
+            HashMap<String, HashMap<String, ArrayList<String>>> funArgCopy = clonarFunArg(funArg);
+
+            // IMPRESION DE CLONES
+            for(int i = 0; i < numClones; i++){
+                funArg = clonarFunArg(funArgCopy);
+                resetIndexFunVar();
+                numClonTh = i;
+
+                if(ctx.firma().TOKEN_ID() != null) {
+                    SubprocesoTrad += funVar.get(procesoActual).get(varReturn).get(funVar.get(procesoActual).get(varReturn).size()-1) + " ";
+                }else {
+                    SubprocesoTrad += "void ";
+                }
+                SubprocesoTrad += procesoActual + "_" + Integer.toString(i) + "(";
+
+                if(ctx.firma().argumentos() != null) {
+                    for(int j = 0; j < ctx.firma().argumentos().TOKEN_ID().size(); j++){
+                        String tipo = funArg.get(procesoActual).get(Integer.toString(j)).get(i+1);
+                        int index = tipo.indexOf('*');
+                        if(index != -1){
+                            if(tipo.contains("cadena*")){
+                                SubprocesoTrad += "char*" + " ";
+                            }else{
+                                SubprocesoTrad += tipo.substring(0, index) + " ";
+                            }
+                            SubprocesoTrad += ctx.firma().argumentos().TOKEN_ID(j).getText();
+                            SubprocesoTrad += tipo.substring(index + 1, tipo.length());
+                        }else{
+                            if(tipo.equals("cadena")){
+                                tipo = "char*";
+                            }
+                            SubprocesoTrad += tipo + " ";
+                            SubprocesoTrad += ctx.firma().argumentos().TOKEN_ID(j).getText();
+
+                        }
+                        if(j != ctx.firma().argumentos().TOKEN_ID().size() - 1){
+                            SubprocesoTrad += ", ";
+                        }
+                    }
+                }
+
+                SubProcesoTh = "";
+                for(int j = 0; j < ctx.comando().size(); j++){
+                    SubProcesoTh += (String) visitComando(ctx.comando().get(j)) + "\n";
+                }
+
+                if(varReturn.equals("")) {
+                    SubprocesoTrad += "){\n" + SubProcesoTh + "}\n";
+                }else{
+                    SubprocesoTrad += "){\n" + SubProcesoTh + "\treturn " + varReturn + ";\n" + "}\n";
+                }
+            }
+
+
+            //procesoActual = ctx.TOKEN_ID().getText();
+            //SubprocesoTrad += (String) visitFirma(ctx.firma());
 
         }else{
+            procesoActual = ctx.TOKEN_ID().getText();
+            visitFirma(ctx.firma());
+
             for(int i = 0; i < ctx.comando().size(); i++){
                 visitComando(ctx.comando().get(i));
             }
@@ -118,50 +228,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitFirma(GrammarParser.FirmaContext ctx) {
         String FirmaTrad = "";
 
-        if(traduccion){
-            String varReturn = "";
-            if(ctx.TOKEN_ID() != null) {
-                varReturn = procesoActual;
-                procesoActual = ctx.TOKEN_ID().getText();
-            }
-
-            int numClones = 0;
-            if(funArg.get(procesoActual).get("0") != null){
-                numClones += funArg.get(procesoActual).get("0").size();
-            }else if(ctx.argumentos() != null && ctx.argumentos().TOKEN_ID().size() == 0){
-                numClones += 1;
-            }else if(ctx.argumentos() == null){
-                numClones += 1;
-            }
-
-            // IMPRESION DE CLONES
-            for(int i = 0; i < numClones; i++){
-                if(ctx.TOKEN_ID() != null) {
-                    FirmaTrad += funVar.get(procesoActual).get(varReturn) + " ";
-                }else {
-                    FirmaTrad += "void ";
-                }
-                FirmaTrad += procesoActual + "_" + Integer.toString(i) + "(";
-
-                if(ctx.argumentos() != null) {
-                    int numVar = ctx.argumentos().TOKEN_ID().size();
-                    for(int j = 0; j < numVar; j++){
-                        FirmaTrad += funArg.get(procesoActual).get(Integer.toString(j)).get(i) + " ";
-                        FirmaTrad += ctx.argumentos().TOKEN_ID().get(j).getText();
-                        if(j != numVar - 1){
-                            FirmaTrad += ",";
-                        }
-                    }
-                }
-
-                if(varReturn.equals("")) {
-                    FirmaTrad += "){\n" + SubProcesoTh + "}\n";
-                }else{
-                    FirmaTrad += "){\n" + SubProcesoTh + "\treturn " + varReturn + ";\n" + "}\n";
-                }
-            }
-
-        }else{
+        if(!traduccion){
             String varReturn = "";
             if(ctx.TOKEN_ID() != null) {
                 varReturn = procesoActual;
@@ -174,6 +241,13 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                 funVar.put(procesoActual, new HashMap<>());
                 funReturn.get(procesoActual).put(varReturn, "");
             }
+
+            if(ctx.argumentos() != null){
+                for (int i = 0; i < ctx.argumentos().TOKEN_ID().size(); i++) {
+                    funArg.get(procesoActual).put(Integer.toString(i), new ArrayList<>());
+                    funArg.get(procesoActual).get(Integer.toString(i)).add(ctx.argumentos().TOKEN_ID(i).getText());
+                }
+            }
         }
         return (T) FirmaTrad;
     }
@@ -183,20 +257,22 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     public T visitProceso(GrammarParser.ProcesoContext ctx) {
         String ProcesoTrad = "";
 
-        if(traduccion) {
+        if(traduccion){
+            procesoActual = "main";
+            resetIndexFunVar();
+
             ProcesoTrad += "int main(){\n";
-            for (int i = 0; i < ctx.comando().size(); i++) {
+            for(int i = 0; i < ctx.comando().size(); i++){
                 ProcesoTrad += (String) visitComando(ctx.comando(i)) + "\n";
             }
-            ProcesoTrad += "\n\treturn 0;\n}\n";
+            ProcesoTrad += "\treturn 0;\n}\n";
         }else{
-
-            if (funVar.get(procesoActual) == null) {
+            procesoActual = "main";
+            if(funVar.get(procesoActual) == null){
                 funReturn.put(procesoActual, new HashMap<>());
                 funArg.put(procesoActual, new HashMap<>());
                 funVar.put(procesoActual, new HashMap<>());
             }
-
             for (int i = 0; i < ctx.comando().size(); i++) {
                 visitComando(ctx.comando(i));
             }
@@ -236,32 +312,40 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
 
     // DECLARACION
+    public int getIndexFunvarActual(String IdTrad){
+        int index = Integer.parseInt(funVar.get(procesoActual).get(IdTrad).get(0));
+        return index;
+    }
+
     @Override
     public T visitDeclaracion(GrammarParser.DeclaracionContext ctx) {
         String DeclaracionTrad = "";
 
         if(traduccion){
             String tipoTrad = (String) visitTipo(ctx.tipo());
+
             String listaVar = "";
             boolean coma = false;
-
             for(int i = 0; i < ctx.TOKEN_ID().size(); i++){
-                String tipoA = funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText());
-                if(tipoA.charAt(tipoA.length() - 1) != '*'){
+
+                String indexTipoActual = funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()).get(0);
+                funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()).set(0, Integer.toString(Integer.parseInt(indexTipoActual) + 1));
+
+                String IdTrad = ctx.TOKEN_ID(i).getText();
+                String tipoActual = funVar.get(procesoActual).get(IdTrad).get(getIndexFunvarActual(IdTrad)+1);
+
+                if(!tipoActual.contains("*")){
                     if (coma) {
                         listaVar += ",";
                     }
                     coma = true;
                     listaVar += (String) ctx.TOKEN_ID(i).getText();
-                    if(tipoTrad.equals("cadena")){
-                        listaVar += "[1000]";
-                    }
                 }
             }
 
             if(listaVar.length() != 0){
                 if(tipoTrad.equals("cadena")){
-                    tipoTrad = "char";
+                    tipoTrad = "char*";
                 }
                 DeclaracionTrad = tipoTrad + " " + listaVar + ";";
             }
@@ -269,9 +353,15 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }else{
             String tipoTrad = (String) visitTipo(ctx.tipo());
             for (int i = 0; i < ctx.TOKEN_ID().size(); i++) {
-                if(funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()) == null) {
-                    funVar.get(procesoActual).put(ctx.TOKEN_ID(i).getText(), tipoTrad);
+                if(funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()) == null){
+                    funVar.get(procesoActual).put(ctx.TOKEN_ID(i).getText(), new ArrayList<>());
+                    funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()).add("0");
+                }else{
+                    String indexTipoActual = funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()).get(0);
+                    funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()).set(0, Integer.toString(Integer.parseInt(indexTipoActual) + 1));
                 }
+
+                funVar.get(procesoActual).get(ctx.TOKEN_ID(i).getText()).add(tipoTrad);
                 if(funReturn.get(procesoActual).get(ctx.TOKEN_ID(i).getText()) != null){
                     funReturn.get(procesoActual).put(ctx.TOKEN_ID(i).getText(), tipoTrad);
                 }
@@ -326,11 +416,12 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             if(traduccion){
                 if (funArg.get(nomSubproceso) != null) {
                     int numClon = 0;
+
                     if (funArg.get(nomSubproceso).get("0") != null) {
-                        for (int i = 0; i < funArg.get(nomSubproceso).get("0").size(); i++) {
+                        for (int i = 1; i < funArg.get(nomSubproceso).get("0").size(); i++) {
                             String tipo = funArg.get(nomSubproceso).get("0").get(i);
-                            if (tipo.charAt(tipo.length() - 1) != 'r') {
-                                funArg.get(nomSubproceso).get("0").set(i, tipo + "r");
+                            if (tipo.charAt(tipo.length() - 1) != '|') {
+                                funArg.get(nomSubproceso).get("0").set(i, tipo + "|");
                                 break;
                             }
                             numClon++;
@@ -381,9 +472,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             String nomSubProceso = Llamada_subproceso1Th;
             for (int i = 0; i < ctx.logOrExpr().size(); i++) {
                 visitLogOrExpr(ctx.logOrExpr().get(i));
-                if (funArg.get(nomSubProceso).get(Integer.toString(i)) == null) {
-                    funArg.get(nomSubProceso).put(Integer.toString(i), new ArrayList<>());
-                }
+
                 funArg.get(nomSubProceso).get(Integer.toString(i)).add(getTipoExpresion());
 
                 int index = tokensExpresionActual.size() - 1;
@@ -400,7 +489,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
         Llamada_dimensionTrad += "[";
         for(int i = 0; i < ctx.logOrExpr().size(); i++){
-            Llamada_dimensionTrad += (String) visitLogOrExpr(ctx.logOrExpr().get(i));
+            Llamada_dimensionTrad += "(int) " + (String) visitLogOrExpr(ctx.logOrExpr().get(i));
             if(i != ctx.logOrExpr().size() - 1){
                 Llamada_dimensionTrad += "][";
             }
@@ -414,29 +503,36 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
 
     // DIMENSION
+    public void varToArray(String IdTrad, String dimensiones){
+        if(funVar.get(procesoActual).get(IdTrad) != null){
+            int index = funVar.get(procesoActual).get(IdTrad).size() - 1;
+            String tipoActual = funVar.get(procesoActual).get(IdTrad).get(index);
+            funVar.get(procesoActual).get(IdTrad).set(index, tipoActual + "*" + dimensiones);
+        }else{
+            System.out.print("Error semantico, la variable " + IdTrad + "no se ha declarado" + "\n");
+        }
+    }
+
     @Override
     public T visitDimension(GrammarParser.DimensionContext ctx){
         String DimensionTrad = "";
 
         if(traduccion){
             for (int i = 0; i < ctx.TOKEN_ID().size(); i++) {
-                String tipoA = funVar.get(procesoActual).get(ctx.TOKEN_ID().get(i).getText());
-                if(tipoA.equals("cadena*")){
-                    tipoA = "char*";
-                }
 
-                DimensionTrad +=  tipoA.substring(0, tipoA.length() - 1) + " ";
-                DimensionTrad += ctx.TOKEN_ID(i);
-                DimensionTrad += (String) visitLlamada_dimension(ctx.llamada_dimension().get(i)) + ";\n";
+                String IdTrad = ctx.TOKEN_ID(i).getText();
+                String tipoActual = funVar.get(procesoActual).get(IdTrad).get(getIndexFunvarActual(IdTrad)+1);
+
+                if(tipoActual.contains("cadena*")){
+                    DimensionTrad += "char*" + " " + ctx.TOKEN_ID(i).getText();
+                }else {
+                    DimensionTrad += tipoActual.substring(0, tipoActual.indexOf('*')) + " " + ctx.TOKEN_ID(i).getText();
+                }
+                DimensionTrad += (String) visitLlamada_dimension(ctx.llamada_dimension(i)) + ";\n";
             }
         }else{
             for (int i = 0; i < ctx.TOKEN_ID().size(); i++) {
-                String Id = ctx.TOKEN_ID().get(i).getText();
-                if(funVar.get(procesoActual).get(Id) != null){
-                    funVar.get(procesoActual).put(Id, funVar.get(procesoActual).get(Id) + "*");
-                }else{
-                    System.out.print("Error semantico - No se ha declarado el tipo de la variable\n");
-                }
+                varToArray(ctx.TOKEN_ID().get(i).getText(), (String) visitLlamada_dimension(ctx.llamada_dimension(i)));
             }
         }
         return (T) DimensionTrad;
@@ -493,8 +589,8 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         String Ciclo_paraTrad = "";
 
         Ciclo_para1Th = ctx.TOKEN_ID().getText();
-        Ciclo_paraTrad += "for( " + Ciclo_para1Th + " = " + (String) visitExpresion(ctx.expresion().get(0)) + "; ";
-        Ciclo_paraTrad += Ciclo_para1Th + " < " + (String) visitExpresion(ctx.expresion().get(1)) + "; ";
+        Ciclo_paraTrad += "for(" + Ciclo_para1Th + " = " + (String) visitExpresion(ctx.expresion().get(0)) + "; ";
+        Ciclo_paraTrad += Ciclo_para1Th + " <= " + (String) visitExpresion(ctx.expresion().get(1)) + "; ";
         Ciclo_paraTrad += (String) visitCiclo_para1(ctx.ciclo_para1());
 
         return (T) Ciclo_paraTrad;
@@ -673,16 +769,21 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             String ExpresionTrad = (String) visitExpresion(ctx.expresion().get(i));
             listaVar += ExpresionTrad;
             if(i != ctx.expresion().size() - 1){
-                listaVar += ",";
+                listaVar += ", ";
             }
 
             String tipo = getTipoExpresion();
+            System.out.println("TIPO: " + tipo);
             if(tipo.equals("bool") || tipo.equals("int")) {
                 listaTipos += "%d";
             }else if(tipo.equals("float")){
                 listaTipos += "%f";
-            }else{
+            }else if(tipo.equals("cadena")){
                 listaTipos += "%s";
+            }else if(tipo.equals("char")){
+                listaTipos += "%c";
+            }else{
+                System.out.print("Error en la expresión que se quiere escribir\n");
             }
 
             int index = tokensExpresionActual.size() - 1;
@@ -750,32 +851,44 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
 
         for (int i = 0; i < ctx.TOKEN_ID().size(); i++) {
             String Llamada_dimensionTrad = (String) visitLista_leer_id1(ctx.lista_leer_id1(i));
-            String Id = ctx.TOKEN_ID(i).getText();
+            String IdTrad = ctx.TOKEN_ID(i).getText();
 
-            String tipo = funVar.get(procesoActual).get(Id);
-            if(tipo.equals("int") || tipo.equals("int*")){
+            String tipo = "";
+            if(funVar.get(procesoActual).get(IdTrad) != null){
+                tipo = funVar.get(procesoActual).get(IdTrad).get(getIndexFunvarActual(IdTrad)+1);
+            }else{
+                for(String var : funArg.get(procesoActual).keySet()){
+                    if(funArg.get(procesoActual).get(var).get(0).equals(IdTrad)){
+                        tipo = funArg.get(procesoActual).get(var).get(numClonTh + 1);
+                    }
+                }
+            }
+
+            if(tipo.equals("int") || tipo.contains("int*")){
                 listaTipos += "%d";
-            }else if(tipo.equals("char") || tipo.equals("char*")){
+            }else if(tipo.equals("char") || tipo.contains("char*")){
                 listaTipos += "%c";
-            }else if(tipo.equals("float") || tipo.equals("float*")){
+            }else if(tipo.equals("float") || tipo.contains("float*")){
                 listaTipos += "%f";
-            }else if(tipo.equals("cadena") || tipo.equals("cadena*")){
+            }else if(tipo.equals("cadena") || tipo.contains("cadena*")){
                 listaTipos += "%s";
-            }else if(tipo.equals("bool") || tipo.equals("bool*")){
-                varBool1 += "int " + Id + "Int = " + Id + Llamada_dimensionTrad + ";\n" + ComandoShift;
-                varBool2 += ComandoShift + Id + Llamada_dimensionTrad + " = " + Id + "Int" + "; \n";
+            }else if(tipo.equals("bool") || tipo.contains("bool*")){
+                varBool1 += "int " + IdTrad + "Int = " + IdTrad + Llamada_dimensionTrad + ";\n" + ComandoShift;
+                varBool2 += ComandoShift + IdTrad + Llamada_dimensionTrad + " = " + IdTrad + "Int" + "; \n";
                 listaTipos += "%d";
             }
 
-            if(tipo.charAt(tipo.length() - 1) == '*' && Llamada_dimensionTrad.length() == 0){
+            if(tipo.contains("*") && Llamada_dimensionTrad.length() == 0){
                 System.out.print("Error semantico - no se definido la posición del arreglo\n");
-            }else if(tipo.charAt(tipo.length() - 1) != '*' && Llamada_dimensionTrad.length() != 0){
+            }else if(!tipo.contains("*") && Llamada_dimensionTrad.length() != 0){
                     System.out.print("Error semantico - la variable no es un arreglo\n");
             }else{
                 if(tipo.equals("bool") || tipo.equals("bool*")){
-                    listaVar += " &" + Id + "Int";
+                    listaVar += " &" + IdTrad + "Int";
+                }else if(tipo.equals("cadena") || tipo.equals("cadena*")){
+                    listaVar +=  IdTrad + Llamada_dimensionTrad;
                 }else{
-                    listaVar += " &" + Id + Llamada_dimensionTrad;
+                    listaVar += " &" + IdTrad + Llamada_dimensionTrad;
                 }
             }
 
@@ -1085,20 +1198,22 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             if(ctx.expresion_llamada().llamada_subproceso() != null){
                 if(traduccion){
                     if(funArg.get(ctx.TOKEN_ID().getText()) != null){
+                        String Llamada_subprocesoTrad = (String) visitExpresion_llamada(ctx.expresion_llamada());
+
                         int numClon = 0;
-                        if(funArg.get(ctx.TOKEN_ID().getText()).get("0") != null) {
-                            for (int i = 0; i < funArg.get(ctx.TOKEN_ID().getText()).get("0").size(); i++) {
+                        if (funArg.get(ctx.TOKEN_ID().getText()).get("0") != null) {
+                            for (int i = 1; i < funArg.get(ctx.TOKEN_ID().getText()).get("0").size(); i++) {
                                 String tipo = funArg.get(ctx.TOKEN_ID().getText()).get("0").get(i);
-                                if (tipo.charAt(tipo.length() - 1) != 'r') {
-                                    funArg.get(ctx.TOKEN_ID().getText()).get("0").set(i, tipo + "r");
+                                if (tipo.charAt(tipo.length() - 1) != '|') {
+                                    funArg.get(ctx.TOKEN_ID().getText()).get("0").set(i, tipo + "|");
                                     break;
                                 }
                                 numClon++;
                             }
                         }
+
                         PrTrad += ctx.TOKEN_ID().getText() + "_" + Integer.toString(numClon);
                         Llamada_subproceso1Th = ctx.TOKEN_ID().getText();
-                        String Llamada_subprocesoTrad = (String) visitExpresion_llamada(ctx.expresion_llamada());
                         if (Llamada_subprocesoTrad.equals("")) {
                             PrTrad += "()";
                         }
@@ -1124,13 +1239,46 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                     }
                 }else{
                     int index = tokensExpresionActual.size()-1;
-                    String tipoVar = funVar.get(procesoActual).get(ctx.TOKEN_ID().getText());
-                    tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoVar);
+                    String IdTrad = ctx.TOKEN_ID().getText();
+                    if(funVar.get(procesoActual).get(IdTrad) != null){
+                        String tipoVar = funVar.get(procesoActual).get(IdTrad).get(getIndexFunvarActual(IdTrad)+1);
+                        tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoVar);
+                    }else {
+                        for(String var : funArg.get(procesoActual).keySet()){
+                            if(funArg.get(procesoActual).get(var).size() != 1 && funArg.get(procesoActual).get(var).get(0).equals(IdTrad)){
+                                String tipoVar = funArg.get(procesoActual).get(var).get(numClonTh + 1);
+                                tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoVar);
+                                break;
+                            }
+                        }
+                    }
                 }
             }else{
                 int index = tokensExpresionActual.size()-1;
-                String tipoDimension = funVar.get(procesoActual).get(ctx.TOKEN_ID().getText());
-                tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoDimension);
+                String IdTrad = ctx.TOKEN_ID().getText();
+
+                if(funVar.get(procesoActual).get(IdTrad) != null){
+                    String tipoDimension = funVar.get(procesoActual).get(IdTrad).get(getIndexFunvarActual(IdTrad)+1);
+                    if(!ctx.expresion_llamada().llamada_dimension().getText().equals("")){
+                        tipoDimension = tipoDimension.substring(0, tipoDimension.indexOf('*') - 1);
+                    }
+                    tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoDimension);
+                }else {
+                    for(String var : funArg.get(procesoActual).keySet()){
+                        if(funArg.get(procesoActual).get(var).size() != 1 && funArg.get(procesoActual).get(var).get(0).equals(IdTrad)){
+                            String tipoDimension = funArg.get(procesoActual).get(var).get(numClonTh + 1);
+                            if(!ctx.expresion_llamada().llamada_dimension().getText().equals("")){
+                                if(tipoDimension.contains("*")){
+                                    tipoDimension = tipoDimension.substring(0, tipoDimension.indexOf('*'));
+                                }
+                            }
+                            System.out.println("TipoDimension: " + tipoDimension);
+                            tokensExpresionActual.set(index, tokensExpresionActual.get(index) + tipoDimension);
+                            break;
+                        }
+                    }
+                }
+
             }
 
         }else if(ctx.TOKEN_MENOS() != null){
