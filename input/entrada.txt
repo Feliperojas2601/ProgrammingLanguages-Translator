@@ -1,5 +1,8 @@
 subproceso varReturn <- hola(e, r, d)
     definir varReturn como entero;
+    definir varReturn como real;
+    leer e, r, d;
+    escribir e, "hola";
 finsubproceso
 
 subproceso ser <- prueba()
@@ -32,10 +35,13 @@ proceso main
     definir a, b, c como entero;
     dimension a[2,3];
 
+    hola(a[1,3], b, falso);
+
     escribir a[2,3];
     leer a[2,3];
     definir a, b como logico;
     dimension a[2];
+    hola(a, b, 1);
 
     escribir a[3], b;
     leer a[2], b, c;
