@@ -66,12 +66,12 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             tipo += "bool";
         }else if(tokensExpresionActual.get(index).contains("float") || tokensExpresionActual.get(index).contains("OpDiv")){
             tipo += "float";
-        }else if(tokensExpresionActual.get(index).contains("cadena")){
-            tipo += "cadena";
         }else if(tokensExpresionActual.get(index).contains("char")){
             tipo += "char";
-        }else{
+        }else if(tokensExpresionActual.get(index).contains("int")){
             tipo += "int";
+        }else{
+            tipo += "cadena";
         }
 
         return tipo;
@@ -214,12 +214,9 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             procesoActual = ctx.TOKEN_ID().getText();
             visitFirma(ctx.firma());
 
-            System.out.print("Sub: " + procesoActual + "\n");
-
             for(int i = 0; i < ctx.comando().size(); i++){
                 visitComando(ctx.comando().get(i));
             }
-            System.out.print("Fin\n\n");
         }
 
         return (T) SubprocesoTrad;
