@@ -45,7 +45,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         for (int j = 0; j < tokensExpresionActual.size(); j++) {
             System.out.print(tokensExpresionActual.get(j) + "\n");
         }
-        System.out.print("FIN\n");
+        System.out.print("token\n\n");
     }
 
     public String getTipoExpresion() {
@@ -214,9 +214,12 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
             procesoActual = ctx.TOKEN_ID().getText();
             visitFirma(ctx.firma());
 
+            System.out.print("Sub: " + procesoActual + "\n");
+
             for(int i = 0; i < ctx.comando().size(); i++){
                 visitComando(ctx.comando().get(i));
             }
+            System.out.print("Fin\n\n");
         }
 
         return (T) SubprocesoTrad;
@@ -369,7 +372,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }else if (ctx.CADENA() != null || ctx.TEXTO() != null){
             TipoTrad = "cadena";
         }else if (ctx.CARACTER() != null){
-            TipoTrad += "char";
+            TipoTrad += "cadena";
         }else if (ctx.ENTERO() != null){
             TipoTrad += "int";
         }else if (ctx.LOGICO() != null){
@@ -455,6 +458,9 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                     if(i != ctx.logOrExpr().size() - 1){
                         Llamada_subprocesoTrad += ",";
                     }
+
+                    int index = tokensExpresionActual.size() - 1;
+                    tokensExpresionActual.remove(index);
                 }
                 Llamada_subprocesoTrad += ")";
             }
@@ -780,7 +786,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }
         EscribirTrad += "printf(\"";
         EscribirTrad += listaTipos;
-        EscribirTrad += "\", ";
+        EscribirTrad += "\\n\", ";
         EscribirTrad += listaVar + ");";
 
         return (T) EscribirTrad;
@@ -912,6 +918,7 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
     // EXPRESION
     @Override
     public T visitExpresion(GrammarParser.ExpresionContext ctx){
+        //tokensExpresionActual.clear();
         String ExpresionTrad = (String) visitLogOrExpr(ctx.logOrExpr());
         return (T) ExpresionTrad;
     }
@@ -1268,7 +1275,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
                 }
 
             }
-
         }else if(ctx.TOKEN_MENOS() != null){
             int index = tokensExpresionActual.size()-1;
             tokensExpresionActual.set(index, tokensExpresionActual.get(index) + "OpMat");
@@ -1284,7 +1290,6 @@ public class MyVisitor<T> extends GrammarBaseVisitor<T> {
         }else if(ctx.TOKEN_PAR_IZQ() != null){
             PrTrad += "(" + (String) visitLogOrExpr(ctx.logOrExpr()) + ")";
         }
-
         return (T) PrTrad;
     }
 
